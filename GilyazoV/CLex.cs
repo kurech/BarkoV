@@ -126,7 +126,7 @@ namespace GilyazoV
                         B:
                         {
 
-                            if (chrFSelection == 'c')
+                            if (chrFSelection == 'd')
                             {
                                 TakeSymbol();
                                 goto CFin;
@@ -212,7 +212,7 @@ namespace GilyazoV
                         }
                         E:
                         {
-                            if (chrFSelection == '0')
+                            if (chrFSelection == '1')
                             {
                                 TakeSymbol();
                                 goto FFin;
@@ -221,10 +221,10 @@ namespace GilyazoV
                         }
                         FFin:
                         {
-                            if (chrFSelection == '0')
+                            if (chrFSelection == '1')
                             {
                                 TakeSymbol();
-                                goto G;
+                                goto H;
                             }
                             else if (enumFSelectionCharType != TCharType.Digit)
                             {
@@ -235,19 +235,19 @@ namespace GilyazoV
                         }
                         G:
                         {
-                            if (chrFSelection == '1')
+                            if (chrFSelection == '0')
                             {
                                 TakeSymbol();
-                                goto H;
+                                goto FFin;
                             }
                             else throw new Exception("Ожидалась 1");
                         }
                         H:
                         {
-                            if (chrFSelection == '0')
+                            if (chrFSelection == '1')
                             {
                                 TakeSymbol();
-                                goto FFin;
+                                goto G;
                             }
                             else throw new Exception("Ожидался 0");
                         }
