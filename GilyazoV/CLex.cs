@@ -110,10 +110,6 @@ namespace GilyazoV
             {
                 case TCharType.Letter:
                     {
-                        //          a       b       c       d   
-                        //  A   |   B   |       |       |       |
-                        //  B   |       |       | CFin  |       |
-                        // CFin | CFin  | CFin  | CFin  | CFin  |
                         A:
                         {
                             if (chrFSelection == 'a')
@@ -121,7 +117,7 @@ namespace GilyazoV
                                 TakeSymbol();
                                 goto B;
                             }
-                            else throw new Exception("Слово должно начинаться с 'ac'");
+                            else throw new Exception("Слово должно начинаться с 'ad'");
                         }
                         B:
                         {
@@ -131,7 +127,7 @@ namespace GilyazoV
                                 TakeSymbol();
                                 goto CFin;
                             }
-                            else throw new Exception("Слово должно начинаться с 'ac'");
+                            else throw new Exception("Слово должно начинаться с 'ad'");
                         }
                         CFin:
                         {
@@ -159,16 +155,6 @@ namespace GilyazoV
                     }
                 case TCharType.Digit:
                     {
-                        //           0     1  
-                        //    A   |  B  |  D  |
-                        //    B   |  C  |     |
-                        //    C   |  A  |     |
-                        //    D   |  E  |     |
-                        //    E   |FFin |     |
-                        //   FFin |  G  |     |
-                        //    G   |     |  H  |
-                        //    H   |FFin |     |
-
                         A:
                         {
                             if (chrFSelection == '0')
@@ -217,7 +203,7 @@ namespace GilyazoV
                                 TakeSymbol();
                                 goto FFin;
                             }
-                            else throw new Exception("Ожидался 0");
+                            else throw new Exception("Ожидался 1");
                         }
                         FFin:
                         {
@@ -231,7 +217,7 @@ namespace GilyazoV
                                 enumFToken = TToken.lxmNumber;
                                 return;
                             }
-                            else throw new Exception("Ожидался 0");
+                            else throw new Exception("Ожидался 1");
                         }
                         G:
                         {
@@ -240,7 +226,7 @@ namespace GilyazoV
                                 TakeSymbol();
                                 goto FFin;
                             }
-                            else throw new Exception("Ожидалась 1");
+                            else throw new Exception("Ожидалась 0");
                         }
                         H:
                         {
@@ -249,7 +235,7 @@ namespace GilyazoV
                                 TakeSymbol();
                                 goto G;
                             }
-                            else throw new Exception("Ожидался 0");
+                            else throw new Exception("Ожидался 1");
                         }
                     }
                 case TCharType.ReservedSymbol:
@@ -357,9 +343,6 @@ namespace GilyazoV
                         break;
                     }
             }
-
-
-
         }
     }
 }
