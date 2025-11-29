@@ -11,7 +11,7 @@ namespace GilyazoV
     public enum TToken
     {
         lxmIdentifier, lxmNumber, lxmUnknown, lxmEmpty, lxmLeftParenth, lxmRightParenth, lxmIs, lxmDot, lxmComma, lxmDollar, lxmMinus, lxmPlus, lxmExclamation, lxmQuestion,
-        lxmAnd, lxmLeftParenthSqr, lxmRightParenthSqr, lxmtz, lxmDD
+        lxmAnd, lxmLeftParenthSqr, lxmRightParenthSqr, lxmtz, lxmDD, lxmInt, lxmOr, lxmAssign, lxmLess, lxmGreater
     };
 
     public class CLex //класс лексический анализатор
@@ -60,11 +60,11 @@ namespace GilyazoV
             }
             else
             {
-                char[] reservedSymbols = new char[] { '(', ')', '[', ']', '.', ',', '!', '?', '$', '&', '-', '+', ';', ':', '/', '*' };
+                char[] reservedSymbols = new char[] { '(', ')', '[', ']', '.', ',', '!', '?', '$', '&', '-', '+', ';', ':', '=', '*', '<', '>' };
 
                 chrFSelection = strFSource[intFSourceRowSelection][intFSourceColSelection]; //классификация прочитанной литеры
                 if (chrFSelection == ' ') enumFSelectionCharType = TCharType.Space;
-                else if (chrFSelection >= 'a' && chrFSelection <= 'd') enumFSelectionCharType = TCharType.Letter;
+                else if (chrFSelection >= 'a' && chrFSelection <= 'z') enumFSelectionCharType = TCharType.Letter;
                 else if (chrFSelection == '0' || chrFSelection == '1') enumFSelectionCharType = TCharType.Digit;
 
                 else if (reservedSymbols.Contains(chrFSelection)) enumFSelectionCharType = TCharType.ReservedSymbol;
@@ -110,37 +110,107 @@ namespace GilyazoV
             {
                 case TCharType.Letter:
                     {
-                        A:
+                        // Проверка на ключевое слово "int"
+                        if (chrFSelection == 'i')
                         {
-                            if (chrFSelection == 'a')
+                            TakeSymbol();
+                            if (chrFSelection == 'n')
                             {
                                 TakeSymbol();
-                                goto B;
-                            }
-                            else throw new Exception("Слово должно начинаться с 'ad'");
-                        }
-                        B:
-                        {
-
-                            if (chrFSelection == 'd')
-                            {
-                                TakeSymbol();
-                                goto CFin;
-                            }
-                            else throw new Exception("Слово должно начинаться с 'ad'");
-                        }
-                        CFin:
-                        {
-                            if (chrFSelection == 'a' || chrFSelection == 'b' || chrFSelection == 'c' || chrFSelection == 'd')
-                            {
-                                TakeSymbol();
-                                goto CFin;
+                                if (chrFSelection == 't')
+                                {
+                                    TakeSymbol();
+                                    // Проверяем, что после "int" нет буквы (чтобы не было "inta")
+                                    if (enumFSelectionCharType == TCharType.Letter)
+                                    {
+                                        throw new Exception("После ключевого слова 'int' не может быть буквы");
+                                    }
+                                    else
+                                    {
+                                        enumFToken = TToken.lxmInt;
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    throw new Exception("Идентификатор должен начинаться с 'ad'");
+                                }
                             }
                             else
                             {
+                                throw new Exception("Идентификатор должен начинаться с 'ad'");
+                            }
+                        }
+                        // Проверка на ключевое слово "or"
+                        else if (chrFSelection == 'o')
+                        {
+                            TakeSymbol();
+                            if (chrFSelection == 'r')
+                            {
+                                TakeSymbol();
+                                // Проверяем, что после "or" нет буквы
+                                if (enumFSelectionCharType == TCharType.Letter)
+                                {
+                                    throw new Exception("После ключевого слова 'or' не может быть буквы");
+                                }
+                                else
+                                {
+                                    enumFToken = TToken.lxmOr;
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                throw new Exception("Идентификатор должен начинаться с 'ad'");
+                            }
+                        }
+                        // Проверка на ключевое слово "and" или идентификатор, начинающийся с "ad"
+                        else if (chrFSelection == 'a')
+                        {
+                            TakeSymbol();
+                            if (chrFSelection == 'n')
+                            {
+                                TakeSymbol();
+                                if (chrFSelection == 'd')
+                                {
+                                    TakeSymbol();
+                                    // Проверяем, что после "and" нет буквы
+                                    if (enumFSelectionCharType == TCharType.Letter)
+                                    {
+                                        throw new Exception("После ключевого слова 'and' не может быть буквы");
+                                    }
+                                    else
+                                    {
+                                        enumFToken = TToken.lxmAnd;
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    throw new Exception("Идентификатор должен начинаться с 'ad'");
+                                }
+                            }
+                            else if (chrFSelection == 'd')
+                            {
+                                // Это идентификатор, начинающийся с "ad"
+                                TakeSymbol();
+                                // Продолжаем читать остальные буквы идентификатора
+                                while (enumFSelectionCharType == TCharType.Letter)
+                                {
+                                    TakeSymbol();
+                                }
                                 enumFToken = TToken.lxmIdentifier;
                                 return;
                             }
+                            else
+                            {
+                                throw new Exception("Идентификатор должен начинаться с 'ad'");
+                            }
+                        }
+                        // Любая другая буква - ошибка, так как идентификаторы должны начинаться с "ad"
+                        else
+                        {
+                            throw new Exception("Идентификатор должен начинаться с 'ad'");
                         }
                     }
                     if (chrFSelection == '/')
@@ -330,7 +400,28 @@ namespace GilyazoV
                         }
                         if (chrFSelection == ':')
                         {
-                            enumFToken = TToken.lxmDD;
+                            TakeSymbol();
+                            if (chrFSelection == '=')
+                            {
+                                TakeSymbol();
+                                enumFToken = TToken.lxmAssign;
+                                return;
+                            }
+                            else
+                            {
+                                enumFToken = TToken.lxmDD;
+                                return;
+                            }
+                        }
+                        if (chrFSelection == '<')
+                        {
+                            enumFToken = TToken.lxmLess;
+                            TakeSymbol();
+                            return;
+                        }
+                        if (chrFSelection == '>')
+                        {
+                            enumFToken = TToken.lxmGreater;
                             TakeSymbol();
                             return;
                         }

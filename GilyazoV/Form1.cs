@@ -10,8 +10,8 @@ namespace GilyazoV
         public Form1()
         {
             InitializeComponent();
-            tbFSource.AppendText("((acbd(100010,000100,000100010)))" + "\r\n");
-            //tbFSource.AppendText("((100(ac, acb, ac, acddc, ac)))" + "\r\n");
+            //tbFSource.AppendText("((acbd(100010,000100,000100010)))" + "\r\n");
+            tbFSource.AppendText("int ad := 000101110;ad<ad" + "\r\n");
             int n = tbFSource.Lines.Length;
 
 
@@ -121,16 +121,24 @@ namespace GilyazoV
                                 break;
                             }
                         case TToken.lxmRightParenth:
-                            {
-                                Reserved(ref s1, Lex, e);
-                                break;
-                            }
                         case TToken.lxmLeftParenth:
-                            {
-                                Reserved(ref s1, Lex, e);
-                                break;
-                            }
                         case TToken.lxmComma:
+                        case TToken.lxmInt:
+                        case TToken.lxmOr:
+                        case TToken.lxmAnd:
+                        case TToken.lxmAssign:
+                        case TToken.lxmLess:
+                        case TToken.lxmGreater:
+                        case TToken.lxmtz:
+                        case TToken.lxmDD:
+                        case TToken.lxmDot:
+                        case TToken.lxmDollar:
+                        case TToken.lxmMinus:
+                        case TToken.lxmPlus:
+                        case TToken.lxmExclamation:
+                        case TToken.lxmQuestion:
+                        case TToken.lxmLeftParenthSqr:
+                        case TToken.lxmRightParenthSqr:
                             {
                                 Reserved(ref s1, Lex, e);
                                 break;

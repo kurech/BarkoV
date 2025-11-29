@@ -39,6 +39,7 @@ namespace GilyazoV
             parent.Nodes.Add(newNode);
         }
 
+        // S -> A; D
         public void S()
         {
             numTokenList.Clear();
@@ -48,111 +49,201 @@ namespace GilyazoV
             TreeNode parent = new TreeNode("S");
             tree.Nodes.Add(parent);
 
-            if (Lex.enumPToken == TToken.lxmLeftParenth) //(A)
+            A(parent);
+            if (Lex.enumPToken == TToken.lxmtz) // ;
             {
                 AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
-                A(parent);
-                if (Lex.enumPToken == TToken.lxmRightParenth)
+                Lex.NextToken();
+                D(parent);
+                tree.ExpandAll();
+                if (!noDuplications)
                 {
-                    AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
-                    tree.ExpandAll();
-                    if (!noDuplications)
-                    {
-                        throw new Exception("Найдены повторяющиеся числа!");
-                    }
-                    else
-                    {
-                        Semantic sem = new Semantic(tree);
-                    }
-
+                    throw new Exception("Найдены повторяющиеся числа!");
                 }
-                else throw new Exception("Ожидалось ) [S]");
+                else
+                {
+                    Semantic sem = new Semantic(tree);
+                }
             }
-            else throw new Exception("Ожидалось ( [S]");
+            else throw new Exception("Ожидалось ; [S]");
         }
+
+        // A -> int L
         public void A(TreeNode highParent)
         {
             TreeNode parent = new TreeNode("A");
             highParent.Nodes.Add(parent);
 
-            Lex.NextToken();
-            if (Lex.enumPToken == TToken.lxmLeftParenth) //(<2>B)
+            if (Lex.enumPToken == TToken.lxmInt)
             {
                 AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
                 Lex.NextToken();
-                if (Lex.enumPToken == TToken.lxmIdentifier || Lex.enumPToken == TToken.lxmNumber)
+                L(parent);
+            }
+            else throw new Exception("Ожидалось int [A]");
+        }
+
+        // L -> IX | I
+        public void L(TreeNode highParent)
+        {
+            TreeNode parent = new TreeNode("L");
+            highParent.Nodes.Add(parent);
+
+            I(parent);
+            if (Lex.enumPToken == TToken.lxmComma) // X -> ,I | ,IX
+            {
+                X(parent);
+            }
+        }
+
+        // X -> ,I | ,IX
+        public void X(TreeNode highParent)
+        {
+            TreeNode parent = new TreeNode("X");
+            highParent.Nodes.Add(parent);
+
+            if (Lex.enumPToken == TToken.lxmComma)
+            {
+                AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
+                Lex.NextToken();
+                I(parent);
+                if (Lex.enumPToken == TToken.lxmComma) // Рекурсивный вызов для ,IX
+                {
+                    X(parent);
+                }
+            }
+        }
+
+        // I -> <2>:=<1>
+        public void I(TreeNode highParent)
+        {
+            TreeNode parent = new TreeNode("I");
+            highParent.Nodes.Add(parent);
+
+            if (Lex.enumPToken == TToken.lxmIdentifier) // <2>
+            {
+                AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
+                Lex.NextToken();
+                if (Lex.enumPToken == TToken.lxmAssign) // :=
                 {
                     AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
-                    firstToken = (TToken)(1 - (int)Lex.enumPToken);
-                    B(parent);
-                    if (Lex.enumPToken == TToken.lxmRightParenth)
+                    Lex.NextToken();
+                    if (Lex.enumPToken == TToken.lxmNumber) // <1>
                     {
                         AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
                         Lex.NextToken();
                     }
-                    else throw new Exception("Ожидалось ) [A]");
+                    else throw new Exception("Ожидалось число [I]");
                 }
-                else throw new Exception("Ожидался идентификатор или число [A]");
+                else throw new Exception("Ожидалось := [I]");
             }
-            else //<1>
-            {
-                if (Lex.enumPToken == TToken.lxmIdentifier || Lex.enumPToken == TToken.lxmNumber)
-                {
-                    firstToken = Lex.enumPToken;
-                    Lex.NextToken();
-                }
-                else throw new Exception("Ожидался идентификатор или число или ( [A]");
-            }
+            else throw new Exception("Ожидался идентификатор [I]");
         }
-        public void B(TreeNode highParent)
-        {
-            TreeNode parent = new TreeNode("B");
-            highParent.Nodes.Add(parent);
 
-            Lex.NextToken();
-            if (Lex.enumPToken == TToken.lxmLeftParenth) //(C)
-            {
-                AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
-                Lex.NextToken();
-                C(parent);
-                if (Lex.enumPToken == TToken.lxmRightParenth)
-                {
-                    AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
-                    Lex.NextToken();
-                }
-                else throw new Exception("Ожидалось ) [B]");
-            }
-            else throw new Exception("Ожидалось ( [B]");
-        }
-        public void C(TreeNode highParent)
-        {
-            TreeNode parent = new TreeNode("C");
-            highParent.Nodes.Add(parent);
-
-            if (Lex.enumPToken == firstToken)
-            {
-                AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
-                D(parent);
-            }
-            else throw new Exception("Ожидался идентификатор или число [C]");
-        }
+        // D -> KY | K
         public void D(TreeNode highParent)
         {
-            Lex.NextToken();
-            if (Lex.enumPToken == TToken.lxmComma)
-            {
-                TreeNode parent = new TreeNode("D");
-                highParent.Nodes.Add(parent);
+            TreeNode parent = new TreeNode("D");
+            highParent.Nodes.Add(parent);
 
+            K(parent);
+            if (Lex.enumPToken == TToken.lxmOr) // Y -> or K | or KY
+            {
+                Y(parent);
+            }
+        }
+
+        // Y -> or K | or KY
+        public void Y(TreeNode highParent)
+        {
+            TreeNode parent = new TreeNode("Y");
+            highParent.Nodes.Add(parent);
+
+            if (Lex.enumPToken == TToken.lxmOr)
+            {
                 AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
                 Lex.NextToken();
-                if (Lex.enumPToken == firstToken)
+                K(parent);
+                if (Lex.enumPToken == TToken.lxmOr) // Рекурсивный вызов для or KY
                 {
-                    AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
-                    D(parent);
+                    Y(parent);
                 }
-                else throw new Exception("Ожидался идентификатор или число [D]");
             }
+        }
+
+        // K -> RZ | R
+        public void K(TreeNode highParent)
+        {
+            TreeNode parent = new TreeNode("K");
+            highParent.Nodes.Add(parent);
+
+            R(parent);
+            if (Lex.enumPToken == TToken.lxmAnd) // Z -> and R | and RY
+            {
+                Z(parent);
+            }
+        }
+
+        // Z -> and R | and RY
+        // RY означает R за которым следует Y
+        public void Z(TreeNode highParent)
+        {
+            TreeNode parent = new TreeNode("Z");
+            highParent.Nodes.Add(parent);
+
+            if (Lex.enumPToken == TToken.lxmAnd)
+            {
+                AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
+                Lex.NextToken();
+                R(parent);
+                // Проверяем, есть ли Y (or K | or KY) после R
+                if (Lex.enumPToken == TToken.lxmOr) // and RY - если после R идет or
+                {
+                    Y(parent);
+                }
+                // Иначе это просто "and R"
+            }
+        }
+
+        // R -> V<V | V>V
+        public void R(TreeNode highParent)
+        {
+            TreeNode parent = new TreeNode("R");
+            highParent.Nodes.Add(parent);
+
+            V(parent);
+            if (Lex.enumPToken == TToken.lxmLess) // V<V
+            {
+                AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
+                Lex.NextToken();
+                V(parent);
+            }
+            else if (Lex.enumPToken == TToken.lxmGreater) // V>V
+            {
+                AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
+                Lex.NextToken();
+                V(parent);
+            }
+            else throw new Exception("Ожидалось < или > [R]");
+        }
+
+        // V -> <2> | <1>
+        public void V(TreeNode highParent)
+        {
+            TreeNode parent = new TreeNode("V");
+            highParent.Nodes.Add(parent);
+
+            if (Lex.enumPToken == TToken.lxmIdentifier) // <2>
+            {
+                AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
+                Lex.NextToken();
+            }
+            else if (Lex.enumPToken == TToken.lxmNumber) // <1>
+            {
+                AddTokenToTree(Lex.enumPToken, Lex.strPLexicalUnit, parent);
+                Lex.NextToken();
+            }
+            else throw new Exception("Ожидался идентификатор или число [V]");
         }
 
     }

@@ -36,32 +36,51 @@ namespace GilyazoV
 
         public void TreeController(TreeNode node)
         {
-            if (node.Text == "A")
+            // I -> <2>:=<1> - идентификатор в первом узле, число в третьем узле
+            if (node.Text == "I")
             {
-                if (node.Nodes.Count > 1)
-                {
-                    strIndentifier = node.Nodes[1].Text.ToString();
-                    CheckLetters(strIndentifier);
-                }
-            }
-            if (node.Text == "C")
-            {
-                //Блок С содержит искомый блок       <2>
+                // Первый узел - идентификатор (<2>)
                 if (node.Nodes.Count > 0)
                 {
-                    strDigital = node.Nodes[0].Text.ToString();
+                    strIndentifier = node.Nodes[0].Text.ToString();
+                    CheckLetters(strIndentifier);
+                }
+                // Третий узел - число (<1>)
+                if (node.Nodes.Count > 2)
+                {
+                    strDigital = node.Nodes[2].Text.ToString();
                     isNumber100(strDigital);
                     countDigits++;
                 }
             }
-            if (node.Text == "D")
+            // V -> <2> | <1> - может содержать идентификатор или число
+            if (node.Text == "V")
             {
-                //Блок D содержит искомый блок      , <2>
-                if (node.Nodes.Count > 1)
+                if (node.Nodes.Count > 0)
                 {
-                    strDigital = node.Nodes[1].Text.ToString();
-                    isNumber100(strDigital);
-                    countDigits++;
+                    string value = node.Nodes[0].Text.ToString();
+                    // Проверяем, является ли это числом (содержит только 0 и 1)
+                    bool isNumber = true;
+                    foreach (char c in value)
+                    {
+                        if (c != '0' && c != '1')
+                        {
+                            isNumber = false;
+                            break;
+                        }
+                    }
+                    if (isNumber)
+                    {
+                        strDigital = value;
+                        isNumber100(strDigital);
+                        countDigits++;
+                    }
+                    // Иначе это идентификатор
+                    else
+                    {
+                        strIndentifier = value;
+                        CheckLetters(strIndentifier);
+                    }
                 }
             }
 
