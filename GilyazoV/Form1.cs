@@ -61,6 +61,79 @@ namespace GilyazoV
             }
             catch (Exception exc)
             {
+                // Проверяем, это ошибка или просто информационное сообщение
+                if (exc.Message.Contains("Переменная") && exc.Message.Contains("не объявлена"))
+                {
+                    // Это реальная ошибка - показываем ее
+                    if (exc.Message == "" || exc.Message == null)
+                    {
+                        tbFMessage.Text += "Неизвестная ошибка";
+                    }
+                    else
+                    {
+                        tbFMessage.Text += exc.Message;
+                    }
+                    tbFSource.Select();
+                    tbFSource.SelectionStart = 0;
+                    int n = 0;
+                    for (int i = 0; i < Synt.Lex.intPSourceRowSelection; i++)
+                    {
+                        n += tbFSource.Lines[i].Length + 2;
+                    }
+                    n += Synt.Lex.intPSourceColSelection;
+                    tbFSource.SelectionLength = n;
+                    return; // Выходим, не выполняя трансляцию
+                }
+                else
+                {
+                    // Это информационное сообщение из Semantic - показываем его
+                    if (exc.Message != "" && exc.Message != null)
+                    {
+                        tbFMessage.Text += exc.Message;
+                    }
+                }
+                // Продолжаем выполнение для трансляции
+            }
+            
+            // Если синтаксический анализ прошел успешно (или завершился информационным сообщением), выполняем трансляцию
+            try
+            {
+                // Проверяем, что дерево построено
+                if (syntTree.Nodes.Count == 0)
+                {
+                    tbFMessage.Text += "Дерево не построено. Невозможно выполнить трансляцию.";
+                    return;
+                }
+
+                Translator translator = new Translator();
+                translator.Translate(syntTree);
+                
+                // Получаем исходный код
+                string sourceCode = string.Join("\r\n", tbFSource.Lines);
+                
+                // Получаем промежуточный код
+                string intermediateCode = translator.GetIntermediateCode();
+                
+                // Получаем результат и последовательность команд
+                int result = translator.GetResult();
+                string commandSequence = translator.GetCommandSequence();
+                
+                // Показываем MessageBox с результатом
+                MessageBox.Show(
+                    $"Числовой результат: {result}\r\n\r\nПоследовательность команд: {commandSequence}",
+                    "Результат трансляции",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+                
+                // Показываем форму с исходным и промежуточным кодом
+                TranslationForm translationForm = new TranslationForm();
+                translationForm.SetSourceCode(sourceCode);
+                translationForm.SetIntermediateCode(intermediateCode);
+                translationForm.ShowDialog();
+            }
+            catch (Exception exc)
+            {
                 if (exc.Message == "" || exc.Message == null)
                 {
                     tbFMessage.Text += "Неизвестная ошибка";

@@ -15,6 +15,10 @@ namespace GilyazoV
         private TreeView tree;
 
         public bool contains100 = false;
+        
+        // Для проверки объявления переменных
+        private HashSet<string> declaredVariables = new HashSet<string>();
+        private List<string> usedVariables = new List<string>();
 
         public Semantic()
         {
@@ -37,12 +41,15 @@ namespace GilyazoV
         public void TreeController(TreeNode node)
         {
             // I -> <2>:=<1> - идентификатор в первом узле, число в третьем узле
+            // Это объявление переменной
             if (node.Text == "I")
             {
                 // Первый узел - идентификатор (<2>)
                 if (node.Nodes.Count > 0)
                 {
                     strIndentifier = node.Nodes[0].Text.ToString();
+                    // Добавляем переменную в список объявленных
+                    declaredVariables.Add(strIndentifier);
                     CheckLetters(strIndentifier);
                 }
                 // Третий узел - число (<1>)
@@ -75,10 +82,12 @@ namespace GilyazoV
                         isNumber100(strDigital);
                         countDigits++;
                     }
-                    // Иначе это идентификатор
+                    // Иначе это идентификатор - использование переменной
                     else
                     {
                         strIndentifier = value;
+                        // Добавляем в список используемых переменных
+                        usedVariables.Add(strIndentifier);
                         CheckLetters(strIndentifier);
                     }
                 }
@@ -93,6 +102,7 @@ namespace GilyazoV
         //Проверка на наличие элемента "100", в случае равенства количества согласных в конце идентификатора с количеством блоков двоичной записи в конструкциях вида <2>, <2>, ... 
         private void Check()
         {
+            // Проверки возвращены для вывода сообщений в tbFMessage
             if (countDigits != countLetters)
             {
                 throw new Exception("Конец слова, текст верный.");

@@ -17,24 +17,11 @@ namespace GilyazoV
         public TToken firstToken;
 
         public List<string> numTokenList = new List<string>();
-        public bool noDuplications = true;
 
         public TreeView tree;
 
         public void AddTokenToTree(TToken token, string input, TreeNode parent)
         {
-            if (token == TToken.lxmNumber)
-            {
-                for (int i = 0; i < numTokenList.Count; i++)
-                {
-                    if (input == numTokenList[i])
-                    {
-                        noDuplications = false;
-                        //FindAndSelectNode(parent, "");
-                    }
-                }
-                numTokenList.Add(input);
-            }
             TreeNode newNode = new TreeNode(input);
             parent.Nodes.Add(newNode);
         }
@@ -43,7 +30,6 @@ namespace GilyazoV
         public void S()
         {
             numTokenList.Clear();
-            noDuplications = true;
             tree.Nodes.Clear();
 
             TreeNode parent = new TreeNode("S");
@@ -56,14 +42,7 @@ namespace GilyazoV
                 Lex.NextToken();
                 D(parent);
                 tree.ExpandAll();
-                if (!noDuplications)
-                {
-                    throw new Exception("Найдены повторяющиеся числа!");
-                }
-                else
-                {
-                    Semantic sem = new Semantic(tree);
-                }
+                Semantic sem = new Semantic(tree);
             }
             else throw new Exception("Ожидалось ; [S]");
         }
